@@ -207,7 +207,7 @@ class DataReader():
         if cuts:
             features = features[ut.get_mask_for_cuts(features, **cuts)]
         if features_to_df:
-            features = pd.DataFrame(features, columns=self.read_labels_from_file(self.dijet_feature_names))
+            features = pd.DataFrame(features, columns=self.read_labels_from_file(keylist=[self.dijet_feature_names])) # BUG FIXED HERE.
         return features
 
 
@@ -247,7 +247,7 @@ class DataReader():
     def read_labels(self, key=None, path=None):
         key = key or self.dijet_feature_names
         path = path or self.path
-        return [ l.decode("utf-8") for l in self.read_data_from_file(key, path) ] # decode to unicode if (from byte str of Python2)
+        return [ l for l in self.read_data_from_file(key, path) ] # decode to unicode if (from byte str of Python2)
 
     def read_labels_from_file(self, fname=None, keylist=None):
         if fname is None:
@@ -257,7 +257,7 @@ class DataReader():
         labels = []
         for key in keylist:
             labels.append(self.read_labels(key, fname))
-        return labels
+        return labels[0]
 
     def read_labels_from_dir(self, flist=None, keylist=None):
         if flist is None:
