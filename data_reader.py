@@ -223,8 +223,10 @@ class DataReader():
         for i_file, fname in enumerate(flist):
             #print(i_file,fname)
             try:
+
                 features = self.read_jet_features_from_file(path=fname, **cuts)
                 features_concat.append(features)
+                #import pdb;pdb.set_trace()
                 n += len(features)
             except OSError as e:
                 print("\nCould not read file ", fname, ': ', repr(e))
@@ -235,8 +237,7 @@ class DataReader():
 
         features_concat = np.concatenate(features_concat, axis=0)[:read_n]
         print('{} events read in {} files in dir {}'.format(features_concat.shape[0], i_file + 1, self.path))
-
-        dijet_feature_names, = self.read_labels_from_dir(flist=flist, keylist=[self.dijet_feature_names])
+        dijet_feature_names = self.read_labels_from_dir(flist=flist, keylist=[self.dijet_feature_names])
 
         if features_to_df:
             features_concat = pd.DataFrame(features_concat, columns=dijet_feature_names)
@@ -247,8 +248,11 @@ class DataReader():
     def read_labels(self, key=None, path=None):
         key = key or self.dijet_feature_names
         path = path or self.path
-        return [ l for l in self.read_data_from_file(key, path) ] # decode to unicode if (from byte str of Python2)
-
+        try:
+            return [ l.decode("utf-8") for l in self.read_data_from_file(key, path) ] # decode to unicode if (from byte str of Python2)
+        except (UnicodeDecodeError, AttributeError):
+            return self.read_data_from_file(key, path)
+        
     def read_labels_from_file(self, fname=None, keylist=None):
         if fname is None:
             fname = self.path
