@@ -376,6 +376,28 @@ class CaseDataReader(DataReader):
             #print("WTF")
             return [constituents, features]
 
+    def read_weights_from_file(self):
+        #print(path)
+        with h5py.File(self.path,'r') as f:
+            #features = np.array(f.get(self.jet_features_key))
+            #print(self.jet_features_key)
+            #print(path)
+            weights = np.array(f[self.sysweights_key][()])
+            #print(features)
+            #print("WTF")
+            return weights
+
+    def read_weights_from_dir(self):
+        #print(path)
+        fList = self.get_file_list_depth1()
+        for i,fName in enumerate(fList):
+            with h5py.File(fName,'r') as f:
+                if i==0:
+                    weights = np.array(f[self.sysweights_key][()])
+                else:
+                    weights = np.concat((weights,np.array(f[self.sysweights_key][()])),axis=0)
+        return weights
+    
     def read_labels(self, key, path=None):
         ''' labels are not provided in CASE dataset '''
         if key == self.dijet_feature_names:
